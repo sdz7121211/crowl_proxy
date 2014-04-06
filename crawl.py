@@ -1,5 +1,7 @@
 #-*- encoding: utf-8 -*-
-
+import gevent
+from gevent import monkey
+monkey.patch_all()
 from util_proxy_crawl import crawl_raw
 from util_proxy_crawl import crawl_effective
 from util_proxy_crawl import available_proxy
@@ -7,8 +9,6 @@ from gevent import queue
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
-import gevent
-
 
 class crawl:
    
@@ -24,11 +24,12 @@ class crawl:
         for url in urls:
             self.put(url)
 
-    def run(self):
+    def run(self, task):
+        print "task num", task
         while not self.url_qu.empty():
             url = self.url_qu.get()
             try:
-                print self.crawl_raw(url)
+                self.crawl_raw(url)
             except Exception, e:
                 print e
             finally:
@@ -43,7 +44,7 @@ class crawl:
 
     def start(self):
         #self.stop = False
-        self.crawls = [gevent.spawn(self.run) for i in range(5)]
+        self.crawls = [gevent.spawn(self.run, i) for i in range(5)]
         self.url_qu.join()
         #while not self.stop:
 
