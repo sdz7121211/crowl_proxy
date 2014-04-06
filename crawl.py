@@ -1,6 +1,8 @@
 #-*- encoding: utf-8 -*-
 import gevent
 from gevent import monkey
+#from gevent.event import AsyscResult
+from gevent.pool import Group
 monkey.patch_all()
 from util_proxy_crawl import crawl_raw
 from util_proxy_crawl import crawl_effective
@@ -10,14 +12,16 @@ import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
-class crawl:
+
+
+class crawl(object):
    
     def __init__(self):
         self.available_proxy = available_proxy
         self.url_qu = queue.JoinableQueue()
         self.stop = True
         self.result = queue.Queue()
-        
+        #self.asysc = AsyncResult()
 
 
     def put(self, url):
@@ -34,6 +38,7 @@ class crawl:
             try:
                 text = self.crawl_raw(url)
                 self.result.put(text)
+                #if self.result.qsize() 
                 gevent.sleep(0)
             except Exception, e:
                 print e
@@ -48,7 +53,9 @@ class crawl:
 
     def start(self, num):
         #self.stop = False
-        self.crawls = [gevent.spawn(self.run, i) for i in range(num)]
+        self.g = Group()
+        #self.crawls = 
+        [self.g.add(gevent.spawn(self.run, i)) for i in range(num)]
         self.url_qu.join()
         #while not self.stop:
 
