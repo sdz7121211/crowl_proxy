@@ -16,6 +16,9 @@ class crawl:
         self.available_proxy = available_proxy
         self.url_qu = queue.JoinableQueue()
         self.stop = True
+        self.result = queue.Queue()
+        
+
 
     def put(self, url):
         self.url_qu.put(url)
@@ -25,26 +28,27 @@ class crawl:
             self.put(url)
 
     def run(self, task):
-        print "task num", task
+        print "task ", task
         while not self.url_qu.empty():
             url = self.url_qu.get()
             try:
-                self.crawl_raw(url)
+                text = self.crawl_raw(url)
+                self.result.put(text)
+                gevent.sleep(0)
             except Exception, e:
                 print e
             finally:
                 self.url_qu.task_done()
-
-
+    
     def crawl_raw(self, url):
         return crawl_raw(url)
 
     def crawl_effective(self, url):
         return crawl_effective(url)
 
-    def start(self):
+    def start(self, num):
         #self.stop = False
-        self.crawls = [gevent.spawn(self.run, i) for i in range(5)]
+        self.crawls = [gevent.spawn(self.run, i) for i in range(num)]
         self.url_qu.join()
         #while not self.stop:
 
@@ -58,4 +62,5 @@ if __name__ == "__main__":
     tester = crawl()
     url = ["http://www.cnproxy.com/proxy1.html"]
     tester.put_list_url(url*5)
-    tester.start()
+    tester.start(5)
+    print tester.result.qsize()
