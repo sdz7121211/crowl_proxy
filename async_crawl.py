@@ -28,8 +28,8 @@ class async_crawl(crawl):
         
     def run(self, i):
         print "task ", i
-        while not self.url_qu.empty():
-            url = self.url_qu.get()
+         while True:
+            url = self.url_qu.get(timeout = 100)
             try:
                 text = self.crawl_raw(url)
                 self.result.put(text)

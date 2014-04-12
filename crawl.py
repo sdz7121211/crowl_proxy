@@ -33,8 +33,9 @@ class crawl(object):
 
     def run(self, task):
         print "task ", task
-        while not self.url_qu.empty():
-            url = self.url_qu.get()
+        #while not self.url_qu.empty():
+        while True:
+            url = self.url_qu.get(timeout = 100)
             try:
                 text = self.crawl_raw(url)
                 self.result.put(text)
