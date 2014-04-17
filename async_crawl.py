@@ -6,11 +6,9 @@ from gevent.pool import Group
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
-# global async_jump, async_in
 
 
 class async_crawl(crawl):
-    # global async_jump, async_in
 
     def __init__(self):
         crawl.__init__(self)
@@ -30,37 +28,39 @@ class async_crawl(crawl):
         self.observer = observer
 
     def run(self, i):
-        # global async_jump, async_in
         task_num = self.job_size
         while task_num > 0:
             print "task ", i
             task_num = task_num - 1
             try:
-                url = self.url_qu.get(timeout=100)
+                details = self.url_qu.get(timeout=100)
+                url = details["url"]
+                print "crawl url", url
             except Exception, e:
                 print "Exception crawl run: ", e
                 return
             try:
                 text = self.crawl_raw(url)
-                self.result.put(text)
-                # if self.result.qsize() > self.job_size/3:
-                self.async_jump.set(text)
+                self.async_jump.set({"url": url, "text": text, "result": details})
                 self.async_in.get()
                 self.async_in = AsyncResult()
-                # if self.result.qsize()
-                # gevent.sleep(0)
             except Exception, e:
                 print e
             finally:
                 self.url_qu.task_done()
-        self.finished.set()
+        # if self.stop == False:
+            # self.finished.get()
+            # self.stop = True
+
+        # self.finished.set()
+        print "task", i, "finished."
 
     def start(self, num):
         # self.work_group = Group()
         # [gevent.spawn(self.run, i) for i in range(num)]
         # gevent.spawn(self.observer)
         # self.url_qu.join()
-        gevent.joinall([gevent.spawn(self.run, i) for i in range(num)]+[gevent.spawn(self.observer, self.async_jump, self.async_in)])
+        gevent.joinall([gevent.spawn(self.run, i) for i in range(num)]+[gevent.spawn(self.observer)])  # , self.async_jump, self.async_in)])
 
 
 # ----------TEST CODE-----------
