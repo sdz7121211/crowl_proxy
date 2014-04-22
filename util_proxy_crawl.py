@@ -19,7 +19,7 @@ available_proxy = []
 def crawl_raw(url):
     global available_proxy
     while 1:
-        if len(available_proxy) < 60:
+        if len(available_proxy) < 40:
             proxy = get_proxies()
             try:
                 print "i am crawl_raw"
@@ -41,7 +41,7 @@ def crawl_effective(url):
     global available_proxy
     while 1:
         #print "len(available_proxy)", len(available_proxy)
-        if len(available_proxy) >= 50:
+        if len(available_proxy) >= 30:
             proxy = random.choice(available_proxy)
             print "i am crawl_effective"
             try:

@@ -3,6 +3,7 @@ from crawl import crawl
 import gevent
 from gevent.event import AsyncResult
 from gevent.pool import Group
+from controler import controler
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -15,6 +16,7 @@ class async_crawl(crawl):
         self.async_jump = AsyncResult()
         self.async_in = AsyncResult()
         self.finished = AsyncResult()
+        self.observer = controler
 
     def put(self, url):
         super(async_crawl, self).put(url)
@@ -29,7 +31,7 @@ class async_crawl(crawl):
 
     def run(self, i):
         task_num = self.job_size
-        while task_num > 0:
+        while True:
             print "task ", i
             task_num = task_num - 1
             try:
@@ -48,19 +50,10 @@ class async_crawl(crawl):
                 print e
             finally:
                 self.url_qu.task_done()
-        # if self.stop == False:
-            # self.finished.get()
-            # self.stop = True
-
-        # self.finished.set()
         print "task", i, "finished."
 
     def start(self, num):
-        # self.work_group = Group()
-        # [gevent.spawn(self.run, i) for i in range(num)]
-        # gevent.spawn(self.observer)
-        # self.url_qu.join()
-        gevent.joinall([gevent.spawn(self.run, i) for i in range(num)]+[gevent.spawn(self.observer)])  # , self.async_jump, self.async_in)])
+        gevent.joinall([gevent.spawn(self.run, i) for i in range(num)]+[gevent.spawn(self.observer)])
 
 
 # ----------TEST CODE-----------
