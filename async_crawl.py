@@ -3,8 +3,8 @@ from crawl import crawl
 import gevent
 from gevent.event import AsyncResult
 from gevent.pool import Group
-from controler import controler
 import sys
+import copy
 reload(sys)
 sys.setdefaultencoding("utf-8")
 
@@ -16,7 +16,7 @@ class async_crawl(crawl):
         self.async_jump = AsyncResult()
         self.async_in = AsyncResult()
         self.finished = AsyncResult()
-        self.observer = controler
+        self.observer = self.controler
 
     def put(self, url):
         super(async_crawl, self).put(url)
@@ -29,6 +29,17 @@ class async_crawl(crawl):
     def setObserver(self, observer):
         self.observer = observer
 
+    def controler(self):
+        while True:
+            details = self.async_jump.get()
+            self.async_jump = AsyncResult()
+            parse = details["parse"]
+            text = details["text"]
+            result_ = copy.copy(details["result"])
+            if text:
+                parse(text, result_)
+            self.async_in.set()
+
     def run(self, i):
         task_num = self.job_size
         while True:
@@ -36,6 +47,7 @@ class async_crawl(crawl):
             task_num = task_num - 1
             try:
                 details = self.url_qu.get(timeout=100)
+                result = details["result"]
                 url = details["url"]
                 print "crawl url", url
             except Exception, e:
@@ -43,7 +55,7 @@ class async_crawl(crawl):
                 return
             try:
                 text = self.crawl_raw(url)
-                self.async_jump.set({"url": url, "text": text, "result": details})
+                self.async_jump.set({"url": url, "text": text, "result": result, "parse": details["parse"]})
                 self.async_in.get()
                 self.async_in = AsyncResult()
             except Exception, e:
