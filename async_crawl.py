@@ -18,8 +18,8 @@ class async_crawl(crawl):
         self.finished = AsyncResult()
         self.observer = self.controler
 
-    def put(self, url):
-        super(async_crawl, self).put(url)
+    def put(self, url, priority=1):
+        super(async_crawl, self).put(url, priority)
         self.job_size = self.url_qu.qsize()
 
     def put_list_url(self, urls):

@@ -8,7 +8,7 @@ from util_proxy_crawl import crawl_raw
 from util_proxy_crawl import crawl_effective
 from util_proxy_crawl import available_proxy
 from proxy_crawl import header
-from gevent import queue
+from gevent.queue import PriorityQueue
 import sys
 reload(sys)
 sys.setdefaultencoding("utf-8")
@@ -18,13 +18,12 @@ class crawl(object):
 
     def __init__(self):
         self.available_proxy = available_proxy
-        self.url_qu = queue.JoinableQueue()
-        self.stop = True
-        self.result = queue.Queue()
+        self.url_qu = PriorityQueue()
+        self.result = PriorityQueue()
 
-    def put(self, url):
-        self.url_qu.put(url)
- 
+    def put(self, url, priority=1):
+        self.url_qu.put(url, priority)
+
     def put_list_url(self, urls):
         for url in urls:
             self.put(url)
@@ -57,8 +56,6 @@ class crawl(object):
         [self.g.add(gevent.spawn(self.run, i)) for i in range(num)]
         self.url_qu.join()
 
-    def stop_crawl(self):
-        self.stop = True
 
 
 if __name__ == "__main__":
