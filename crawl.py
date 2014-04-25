@@ -38,8 +38,8 @@ class crawl(object):
                 gevent.sleep(0)
             except Exception, e:
                 print e
-            finally:
-                self.url_qu.task_done()
+            # finally:
+            #    self.url_qu.task_done()
 
     def setHeaders(self, **kws):
         for key in kws:

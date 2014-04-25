@@ -60,8 +60,8 @@ class async_crawl(crawl):
                 self.async_in = AsyncResult()
             except Exception, e:
                 print e
-            finally:
-                self.url_qu.task_done()
+            # finally:
+            #    self.url_qu.task_done()
         print "task", i, "finished."
 
     def start(self, num):
