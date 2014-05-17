@@ -7,30 +7,30 @@ sys.setdefaultencoding("utf-8")
 
 
 header = {
-            "Accept":"text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-            "Accept-Encoding":"gzip,deflate,sdch",
-            "Accept-Language":"zh-CN,zh;q=0.8",
-            "Cache-Control":"max-age=0",
-            "Connection":"keep-alive",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Encoding": "gzip,deflate,sdch",
+            "Accept-Language": "zh-CN,zh;q=0.8",
+            "Cache-Control": "max-age=0",
+            "Connection": "keep-alive",
             # "Host":"www.oschina.net"
-            "Referer":"https://www.google.com.hk/",
-            "User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36"
+            "Referer": "https://www.google.com.hk/",
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.152 Safari/537.36"
         }
 
 
-def crawl_GET(url, proxies = None, params = None):
+def crawl_GET(url, proxies=None, params=None):
     s = Session()
     req = Request(
                     "GET", url,
-                    params = params,
-                    headers = header)
+                    params=params,
+                    headers=header)
     prep = s.prepare_request(req)
     if not proxies:
         proxies = get_proxies()
     resp = s.send(
                     prep,
-                    proxies = proxies,
-                    timeout = 5)                    
+                    proxies=proxies,
+                    timeout=5)                 
     if resp.status_code == 200:
         return resp.text
     else:
@@ -46,7 +46,8 @@ def load_proxies():
     continer_proxy = []
     for item in f.readlines():
         item = item.strip()
-        continer_proxy.append({"http":"".join(["http://", item])})
+        continer_proxy.append({"http": "".join(["http://", item])})
+
 
 def get_proxies():
     global continer_proxy
@@ -55,8 +56,8 @@ def get_proxies():
 
 load_proxies()
 
-def getHtml(url, proxies = None, params = None):
-    while 1:
+def getHtml(url, proxies=None, params=None):
+    while True:
         try:
             result = crawl_GET(url, proxies, params)
             proxies = None

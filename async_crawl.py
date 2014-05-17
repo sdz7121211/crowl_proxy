@@ -30,39 +30,43 @@ class async_crawl(crawl):
         self.observer = observer
 
     def controler(self):
-        while True:
-            details = self.async_jump.get()
-            self.async_jump = AsyncResult()
-            parse = details["parse"]
-            text = details["text"]
-            result_ = copy.copy(details["result"])
-            if text:
-                parse(text, result_)
-            self.async_in.set()
+        try:
+            while True:
+                details = self.async_jump.get(timeout=20)
+                self.async_jump = AsyncResult()
+                parse = details["parse"]
+                text = details["text"]
+                result_ = details["result"]
+                if text:
+                    parse(text, result_)
+                self.async_in.set()
+        except Exception, e:
+            print "controler", e
+            return
 
     def run(self, i):
         task_num = self.job_size
         while True:
             print "task ", i
-            task_num = task_num - 1
             try:
-                details = self.url_qu.get(timeout=100)
+                details = self.url_qu.get(timeout=20)
                 result = details["result"]
                 url = details["url"]
                 print "crawl url", url
             except Exception, e:
                 print "Exception crawl run: ", e
-                return
+                task_num = task_num - 1
+                break
             try:
                 text = self.crawl_raw(url)
                 self.async_jump.set({"url": url, "text": text, "result": result, "parse": details["parse"]})
-                self.async_in.get()
+                self.async_in.get(timeout=20)
                 self.async_in = AsyncResult()
             except Exception, e:
                 print e
             # finally:
             #    self.url_qu.task_done()
-        print "task", i, "finished."
+        print "task", i, "finished. Has task_num:", task_num
 
     def start(self, num):
         gevent.joinall([gevent.spawn(self.run, i) for i in range(num)]+[gevent.spawn(self.observer)])
