@@ -22,8 +22,8 @@ global citys, hotels
 citys = {}
 hotels = {}
 setting = {
-        "start_date": "2014-05-12",
-        "dep_date": "2014-05-13",
+        "start_date": "2014-05-19",
+        "dep_date": "2014-05-20",
         "website": "ctrip",
         "lengthofstay": 1,
         "send_email_time": {"hour": 2,
